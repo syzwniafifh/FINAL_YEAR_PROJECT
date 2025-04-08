@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/log_management.css') }}">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('upload_file') }}">Upload Logs</a></li>
+            <li><a href="{{ url_for('log_management') }}" class="active">Manage Logs</a></li>
+            <li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h2>Log Management</h2>
+
+        <!-- File Selection -->
+        <form method="GET" action="{{ url_for('log_management') }}">
+            <label for="file">Select a Log File:</label>
+            <select name="file" onchange="this.form.submit()">
+                <option value="">-- Choose a File --</option>
+                {% for file in uploaded_files %}
+                    <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <!-- Dropdown Filter for Log Level -->
+        {% if selected_file %}
+        <form method="GET" action="{{ url_for('log_management') }}">
+            <input type="hidden" name="file" value="{{ selected_file }}">
+            <label for="log_level">Filter by Log Level:</label>
+            <select name="log_level" onchange="this.form.submit()">
+                <option value="">-- Show All --</option>
+                <option value="Information" {% if log_level == 'Information' %}selected{% endif %}>Information</option>
+                <option value="Warning" {% if log_level == 'Warning' %}selected{% endif %}>Warning</option>
+                <option value="Error" {% if log_level == 'Error' %}selected{% endif %}>Error</option>
+            </select>
+        </form>
+        {% endif %}
+
+        <!-- Log Table -->
+        <div class="log-table-container">
+            <h3>Uploaded Logs</h3>
+            {% if log_data %}
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in log_data[0].keys() %}
+                                <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in log_data %}
+                            <tr>
+                                {% for value in row.values() %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No logs available. Select a file to view logs.</p>
+            {% endif %}
+        </div>
+
+        <!-- Delete Log File -->
+        {% if selected_file %}
+            <a href="{{ url_for('delete_log', filename=selected_file) }}" class="delete-btn">Delete Log File</a>
+        {% endif %}
+    </div>
+
+</body>
+</html>
